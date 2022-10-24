@@ -2,12 +2,17 @@
 
 // Data
 const account1 = {
-    owner: 'Jonas Schmedtmann', movements: [200, 450, -400, 3000, -650, -130, 70, 1300], interestRate: 1.2, // %
+    owner: 'Jonas Schmedtmann',
+    movements: [200, 450, -400, 3000, -650, -130, 70, 1300],
+    interestRate: 1.2, // %
     pin: 1111,
 };
 
 const account2 = {
-    owner: 'Jessica Davis', movements: [5000, 3400, -150, -790, -3210, -1000, 8500, -30], interestRate: 1.5, pin: 2222,
+    owner: 'Jessica Davis',
+    movements: [5000, 3400, -150, -790, -3210, -1000, 8500, -30],
+    interestRate: 1.5,
+    pin: 2222,
 };
 
 const account3 = {
@@ -18,7 +23,10 @@ const account3 = {
 };
 
 const account4 = {
-    owner: 'Sarah Smith', movements: [430, 1000, 700, 50, 90], interestRate: 1, pin: 4444,
+    owner: 'Sarah Smith',
+    movements: [430, 1000, 700, 50, 90],
+    interestRate: 1,
+    pin: 4444,
 };
 
 const accounts = [account1, account2, account3, account4];
@@ -50,6 +58,8 @@ const inputLoanAmount = document.querySelector('.form__input--loan-amount');
 const inputCloseUsername = document.querySelector('.form__input--user');
 const inputClosePin = document.querySelector('.form__input--pin');
 
+
+// Displaying movements
 const displayMovements = function (movements) {
     containerMovements.innerHTML = '';
 
@@ -64,9 +74,9 @@ const displayMovements = function (movements) {
         containerMovements.insertAdjacentHTML('afterbegin', html);
     });
 };
-
 displayMovements(account1.movements);
 
+// Creating usernames
 const createUserNames = (accounts) => {
     accounts.forEach((account) => {
         account.username = account.owner.toLowerCase().split(' ').map((element) => {
@@ -74,18 +84,18 @@ const createUserNames = (accounts) => {
         }).join('');
     })
 }
-
 createUserNames(accounts);
 
+// Calculating and Displaying Balance
 const calculateDisplayBalance = (movements) => {
     const balance = movements.reduce((accumulator, movement) => {
         return accumulator + movement;
     })
     labelBalance.textContent = `${balance}€`;
 }
-
 calculateDisplayBalance(account1.movements);
 
+// Calculating summary
 const calculateDisplaySummary = (movements) => {
     const incomes = movements.filter(movement => movement > 0).reduce((accumulator, movement) => accumulator + movement, 0);
     labelSumIn.textContent = `${incomes}€`;
@@ -93,18 +103,18 @@ const calculateDisplaySummary = (movements) => {
     const outcomes = movements.filter(movement => movement < 0).reduce((accumulator, movement) => accumulator + movement, 0);
     labelSumOut.textContent = `${Math.abs(outcomes)}€`;
 
-    const interest = movements.filter(movement => movement > 0).map(deposit => deposit * 1.2);
+    const interest = movements.filter(movement => movement > 0).map(deposit => (deposit * 1.2) / 100).filter((interest) => interest >= 1).reduce((accumulator, movement) => accumulator + movement, 0);
+
+    labelSumInterest.textContent = `${interest}€`
 }
 
 calculateDisplaySummary(account1.movements);
 
-let movements = [100, 250, -350, 650, 900, 800, -750, -555];
-const euroToUSD = 1.1;
 
-const totalDepositsUSD = movements.filter(movement => movement > 0).map(movement => movement * euroToUSD).reduce((accumulator, movement) => accumulator + movement, 0);
-// We can only chain methods if the return type of previous method is an array
-console.log(totalDepositsUSD);
-
+// Implementing Login
+btnLogin.addEventListener('click', (event) => {
+    event.preventDefault();
+})
 
 
 
