@@ -107,13 +107,19 @@ const calculateDisplaySummary = (movements) => {
 
     labelSumInterest.textContent = `${interest}€`
 }
-
 calculateDisplaySummary(account1.movements);
 
-
 // Implementing Login
+let currentAccount;
+
 btnLogin.addEventListener('click', (event) => {
     event.preventDefault();
+    currentAccount = accounts.find(account => account.username === inputLoginUsername.value);
+    console.log(currentAccount);
+
+    if (currentAccount && currentAccount.pin === Number(inputLoginPin.value)) {
+        console.log('Login');
+    }
 })
 
 
