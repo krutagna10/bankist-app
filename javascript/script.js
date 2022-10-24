@@ -79,19 +79,16 @@ displayMovements(account1.movements);
 // Creating usernames
 const createUserNames = (accounts) => {
     accounts.forEach((account) => {
-        account.username = account.owner.toLowerCase().split(' ').map((element) => {
-            return element[0];
-        }).join('');
+        account.username = account.owner.split(' ').map(element => element[0].toLowerCase()).join('');
     })
 }
+
+
 createUserNames(accounts);
 
 // Calculating and Displaying Balance
 const calculateDisplayBalance = (movements) => {
-    const balance = movements.reduce((accumulator, movement) => {
-        return accumulator + movement;
-    })
-    labelBalance.textContent = `${balance}€`;
+    labelBalance.textContent = movements.reduce((accumulator, movement) => accumulator + movement, 0) + '€';
 }
 calculateDisplayBalance(account1.movements);
 
@@ -120,7 +117,9 @@ btnLogin.addEventListener('click', (event) => {
     if (currentAccount && currentAccount.pin === Number(inputLoginPin.value)) {
         console.log('Login');
     }
-})
+});
+
+
 
 
 
