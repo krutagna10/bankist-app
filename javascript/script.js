@@ -40,8 +40,8 @@ const labelSumOut = document.querySelector('.summary__value--out');
 const labelSumInterest = document.querySelector('.summary__value--interest');
 const labelTimer = document.querySelector('.timer');
 
-const containerApp = document.querySelector('.app');
-const containerMovements = document.querySelector('.movements');
+const appContainer = document.querySelector('.app');
+const movementsContainer = document.querySelector('.movements');
 const logo = document.querySelector('.logo');
 
 const btnLogin = document.querySelector('.login__btn');
@@ -61,7 +61,7 @@ const inputClosePin = document.querySelector('.form__input--pin');
 
 // Displaying movements
 const displayMovements = function (movements) {
-    containerMovements.innerHTML = '';
+    movementsContainer.innerHTML = '';
 
     movements.forEach((movement, index) => {
         const type = movement > 0 ? 'deposit' : 'withdrawal';
@@ -71,10 +71,10 @@ const displayMovements = function (movements) {
         <div class="movements__value">${movement}€</div>
       </div>
     `;
-        containerMovements.insertAdjacentHTML('afterbegin', html);
+        movementsContainer.insertAdjacentHTML('afterbegin', html);
     });
 };
-displayMovements(account1.movements);
+
 
 // Creating usernames
 const createUserNames = (accounts) => {
@@ -90,7 +90,7 @@ createUserNames(accounts);
 const calculateDisplayBalance = (movements) => {
     labelBalance.textContent = movements.reduce((accumulator, movement) => accumulator + movement, 0) + '€';
 }
-calculateDisplayBalance(account1.movements);
+
 
 // Calculating summary
 const calculateDisplaySummary = (movements) => {
@@ -104,7 +104,7 @@ const calculateDisplaySummary = (movements) => {
 
     labelSumInterest.textContent = `${interest}€`
 }
-calculateDisplaySummary(account1.movements);
+
 
 // Implementing Login
 let currentAccount;
@@ -112,12 +112,23 @@ let currentAccount;
 btnLogin.addEventListener('click', (event) => {
     event.preventDefault();
     currentAccount = accounts.find(account => account.username === inputLoginUsername.value);
-    console.log(currentAccount);
-
-    if (currentAccount && currentAccount.pin === Number(inputLoginPin.value)) {
-        console.log('Login');
+    if (currentAccount?.pin === Number(inputLoginPin.value)) {
+        // Display Ui and Message
+        labelWelcome.textContent = `Welcome back, ${currentAccount.owner.split(' ')[0]}`;
+        appContainer.style.opacity = 1;
     }
+
+   // Display Movements
+    displayMovements(currentAccount.movements);
+
+    // Display Balance
+    calculateDisplayBalance(currentAccount.movements);
+
+    // Display Summary
+    calculateDisplaySummary(currentAccount.movements);
 });
+
+
 
 
 
