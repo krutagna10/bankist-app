@@ -154,6 +154,16 @@ btnTransfer.addEventListener('click', (event) => {
     updateUI(currentAccount);
 })
 
+btnLoan.addEventListener('click', (event) => {
+    event.preventDefault();
+    const loanAmount = Number(inputLoanAmount.value);
+    if (loanAmount > 0 && currentAccount.movements.some(movement => movement >= loanAmount * 0.1)) {
+        currentAccount.movements.push(loanAmount);
+        updateUI(currentAccount);
+    }
+    inputLoanAmount.textContent = '';
+})
+
 
 btnClose.addEventListener('click', (event) => {
     event.preventDefault();
@@ -169,6 +179,7 @@ btnClose.addEventListener('click', (event) => {
         labelWelcome.textContent = `Login to get started`;
     }
 })
+
 
 
 
