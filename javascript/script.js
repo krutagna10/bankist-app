@@ -60,10 +60,12 @@ const inputClosePin = document.querySelector('.form__input--pin');
 
 
 // Displaying movements
-const displayMovements = function (movements) {
+const displayMovements = function (movements, sort = false) {
     movementsContainer.innerHTML = '';
 
-    movements.forEach((movement, index) => {
+    const currentMovements = sort ? movements.slice().sort((a, b) => a - b) : movements;
+
+    currentMovements.forEach((movement, index) => {
         const type = movement > 0 ? 'deposit' : 'withdrawal';
         const html = `
        <div class="movements__row">
@@ -180,23 +182,14 @@ btnClose.addEventListener('click', (event) => {
     }
 })
 
-
-
-const owners = ['Jonas', 'Zach', 'Adam', 'Martha'];
-console.log(owners.sort());
-
-const numbers = [200, 450, -400, 3000, 650, -130, 70, 1300];
-
-numbers.sort((a, b) => {
-    if (a > b) {
-        return 1;
-    }
-    if (b > a) {
-        return -1;
-    }
+let sorted = false;
+btnSort.addEventListener('click', (event) => {
+    event.preventDefault();
+    displayMovements(currentAccount.movements, !sorted);
+    sorted = !sorted;
 })
 
-console.log(numbers);
+
 
 
 
