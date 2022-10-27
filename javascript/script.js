@@ -180,14 +180,15 @@ btnClose.addEventListener('click', (event) => {
         inputCloseUsername.value = inputClosePin.value = '';
         labelWelcome.textContent = `Login to get started`;
     }
-})
+});
 
 let sorted = false;
 btnSort.addEventListener('click', (event) => {
     event.preventDefault();
     displayMovements(currentAccount.movements, !sorted);
     sorted = !sorted;
-})
+});
+
 
 
 
