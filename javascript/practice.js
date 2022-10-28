@@ -28,17 +28,7 @@ for (const dog of dogs) {
     }
 }
 
-const dogsCopy = [...dogs];
-
-for (let i = 0; i < dogsCopy.length; i++) {
-    for (let j = 1; j < dogsCopy.length - i - 1; j++) {
-        if (dogsCopy[j].curFood < dogsCopy[j - 1].curFood) {
-            let temp = dogsCopy[j];
-            dogsCopy[j] = dogsCopy[j - 1];
-            dogsCopy[j - 1] = temp;
-        }
-    }
-}
+const dogsCopy = dogs.slice().sort((a, b) => a.recommendedPortion - b.recommendedPortion);
 console.log(dogsCopy);
 
 let arr = [10, 8, 6, 4, 2];
