@@ -82,7 +82,7 @@ const displayMovements = function (movements, sort = false) {
         const html = `
        <div class="movements__row">
          <div class="movements__type movements__type--${type}">${index + 1} ${type}</div>
-        <div class="movements__value">${movement}€</div>
+        <div class="movements__value">${movement.toFixed(2)}€</div>
       </div>
     `;
         movementsContainer.insertAdjacentHTML('afterbegin', html);
@@ -104,20 +104,20 @@ createUserNames(accounts);
 
 const calculateDisplayBalance = (account) => {
     account.balance = account.movements.reduce((accumulator, movement) => accumulator + movement, 0);
-    labelBalance.textContent = `${account.balance} €`;
+    labelBalance.textContent = `${account.balance.toFixed(2)} €`;
 }
 
 // Calculating summary
 const calculateDisplaySummary = (account) => {
     const incomes = account.movements.filter(movement => movement > 0).reduce((accumulator, movement) => accumulator + movement, 0);
-    labelSumIn.textContent = `${incomes}€`;
+    labelSumIn.textContent = `${incomes.toFixed(2)}€`;
 
     const outcomes = account.movements.filter(movement => movement < 0).reduce((accumulator, movement) => accumulator + movement, 0);
-    labelSumOut.textContent = `${Math.abs(outcomes)}€`;
+    labelSumOut.textContent = `${Math.abs(outcomes).toFixed(2)}€`;
 
     const interest = account.movements.filter(movement => movement > 0).map(deposit => (deposit * account.interestRate) / 100).filter((interest) => interest >= 1).reduce((accumulator, movement) => accumulator + movement, 0);
 
-    labelSumInterest.textContent = `${interest}€`
+    labelSumInterest.textContent = `${interest.toFixed(2)}€`
 }
 
 const updateUI = (account) => {
@@ -170,7 +170,7 @@ btnTransfer.addEventListener('click', (event) => {
 
 btnLoan.addEventListener('click', (event) => {
     event.preventDefault();
-    const loanAmount = Number(inputLoanAmount.value);
+    const loanAmount = Math.floor(inputLoanAmount.value);
     if (loanAmount > 0 && currentAccount.movements.some(movement => movement >= loanAmount * 0.1)) {
         currentAccount.movements.push(loanAmount);
         updateUI(currentAccount);
@@ -200,6 +200,9 @@ btnSort.addEventListener('click', (event) => {
     displayMovements(currentAccount.movements, !sorted);
     sorted = !sorted;
 });
+
+
+
 
 
 

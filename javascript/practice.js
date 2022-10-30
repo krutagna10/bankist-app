@@ -35,15 +35,3 @@ let arr = [10, 8, 6, 4, 2];
 arr.sort((a, b) => a - b);
 console.log(arr);
 
-// Rounding
-console.log(Math.trunc(23.3));
-console.log(Math.round(23.9));
-
-console.log(Math.ceil(23.9));
-console.log(Math.floor(23.9));
-
-console.log(Math.floor(23.9));
-console.log(Math.floor(23.9));
-
-
-
