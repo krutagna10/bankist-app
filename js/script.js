@@ -229,8 +229,14 @@ btnSort.addEventListener('click', (event) => {
     sorted = !sorted;
 });
 
+const future = new Date (2037, 10, 19, 15, 23);
+console.log(Number(future));
 
-
+const calcDaysPassed = (date1, date2) => {
+    return (date2- date1) / (1000 * 60 * 60 * 24)
+};
+const days1 = calcDaysPassed(new Date(2022, 0, 31), new Date(2024, 0, 31));
+console.log(days1);
 
 
 
