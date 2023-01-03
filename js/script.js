@@ -18,7 +18,7 @@ const account1 = {
         '2023-01-01T10:51:36.790Z',
     ],
     currency: 'EUR',
-    locale: 'pt-PT', // de-DE
+    locale: 'en-US', // de-DE
 };
 
 const account2 = {
@@ -70,13 +70,16 @@ const inputLoanAmount = document.querySelector('.form__input--loan-amount');
 const inputCloseUsername = document.querySelector('.form__input--user');
 const inputClosePin = document.querySelector('.form__input--pin');
 
+let currentAccount;
+let timer;
+
 
 // Calculating Days passed
 const calcDaysPassed = (date1, date2) => {
     return Math.floor(Math.abs((date2 - date1) / (1000 * 60 * 60 * 24)));
 };
 
-const formatMovementDate = (date) => {
+const formatMovementDate = (date, locale) => {
     const daysPassed = calcDaysPassed(new Date(), date)
     if (daysPassed === 0) {
         return 'Today';
@@ -85,11 +88,16 @@ const formatMovementDate = (date) => {
     } else if (daysPassed >= 1 && daysPassed <= 7) {
         return `${daysPassed} days ago`;
     } else {
-        const day = date.getDate().toString().padStart(2, '0');
-        const month = (date.getMonth() + 1).toString().padStart(2, '0');
-        const year = date.getFullYear();
-        return `${day}/${month}/${year}`;
+        return new Intl.DateTimeFormat(locale).format(date);
     }
+};
+
+const formatCurrency = (value, locale, currency) => {
+    const obj = {
+        style: 'currency',
+        currency: currency
+    }
+    return new Intl.NumberFormat(locale, obj).format(value);
 }
 
 const displayMovements = (account, sort = false) => {
@@ -99,14 +107,16 @@ const displayMovements = (account, sort = false) => {
 
     currentMovements.forEach((movement, index) => {
         const type = movement > 0 ? 'deposit' : 'withdrawal';
-        let date = new Date(account.movementsDates[index]);
-        let displayDate = formatMovementDate(date);
+        const date = new Date(account.movementsDates[index]);
+        const displayDate = formatMovementDate(date, account.locale);
+
+        const formattedMovement = formatCurrency(movement, account.locale, account.currency);
 
         const html = `
       <div class="movements__row">
             <div class="movements__type movements__type--${type}">${index + 1} ${type}</div>
             <div class="movements__date">${displayDate}</div>
-            <div class="movements__value">${movement.toFixed(2)}</div>
+            <div class="movements__value">${formattedMovement}</div>
        </div>
         `;
         movementsContainer.insertAdjacentHTML('afterbegin', html);
@@ -116,7 +126,7 @@ const displayMovements = (account, sort = false) => {
 // Create usernames
 const createUserNames = (accounts) => {
     accounts.forEach((account) => {
-        account.username = account.owner.toLowerCase().split(' ').map(element => element[0]).join('');
+        account.username = account.owner.split(' ').map(element => element[0].toLowerCase()).join('');
     })
 }
 createUserNames(accounts);
@@ -124,20 +134,20 @@ createUserNames(accounts);
 // Calculating and displaying balance
 const calculateDisplayBalance = (account) => {
     account.balance = account.movements.reduce((acc, movement) => acc + movement, 0);
-    labelBalance.textContent = `${account.balance.toFixed(2)} €`;
+    labelBalance.textContent = formatCurrency(account.balance, account.locale, account.currency);
 }
 
 // Calculating and displaying summary
 const calculateDisplaySummary = (account) => {
     let incomes = account.movements.filter(movement => movement > 0).reduce((acc, movement) => acc + movement, 0);
-    labelSumIn.textContent = `${incomes.toFixed(2)}€`;
+    labelSumIn.textContent = formatCurrency(incomes, account.locale, account.currency);
 
-    let outcomes = account.movements.filter(movement => movement < 0).reduce((acc, movement) => acc + movement, 0);
-    labelSumOut.textContent = `${outcomes.toFixed(2)}€`;
+    let outcomes = Math.abs(account.movements.filter(movement => movement < 0).reduce((acc, movement) => acc + movement, 0));
+    labelSumOut.textContent = formatCurrency(outcomes, account.locale, account.currency);
 
     const interest = account.movements.filter(movement => movement > 0).map(deposit => (deposit * account.interestRate) / 100).filter((interest) => interest >= 1).reduce((acc, movement) => acc + movement, 0);
 
-    labelSumInterest.textContent = `${interest.toFixed(2)}€`
+    labelSumInterest.textContent = formatCurrency(interest, account.locale, account.currency);
 }
 
 const updateUI = (account) => {
@@ -151,33 +161,60 @@ const updateUI = (account) => {
     calculateDisplaySummary(account);
 }
 
-// Implementing login
-let currentAccount = '';
-currentAccount = account1;
-updateUI(currentAccount);
-appContainer.style.opacity = '1';
+const startLogoutTimer = () => {
+    let time = 300;
+    const tick = () => {
+        const min = String(Math.floor(time / 60)).padStart(2, '0');
+        const sec = String(time % 60).padStart(2, '0');
+        labelTimer.textContent = `${min}:${sec}`;
 
-const currentDate = new Date();
-const day = currentDate.getDate().toString().padStart(2, '0');
-const month = (currentDate.getMonth() + 1).toString().padStart(2, '0');
-const year = currentDate.getFullYear();
-const hour = currentDate.getHours().toString().padStart(2, '0');
-const minutes = currentDate.getMinutes().toString().padStart(2, '0');
-console.log(day, month, year, hour, minutes)
-labelDate.textContent = `${day}/${month}/${year}, ${hour}:${minutes}`;
+        //    Stop time when it reaches 0 seconds
+        if (time === 0) {
+            clearInterval(timer);
+            appContainer.style.opacity = '0';
+            labelWelcome.textContent = 'Login to get started';
+        }
+        time--;
+    };
+    tick();
+    const timer = setInterval(tick, 1000);
+    return timer;
+}
+
+// Implementing login
+
 
 // Login button
 btnLogin.addEventListener('click', (event) => {
     event.preventDefault();
-    currentAccount = accounts.find(account => account.username = inputLoginUsername.value)
-    console.log(currentAccount);
+    currentAccount = accounts.find(account => account.username === inputLoginUsername.value)
+
     if (currentAccount?.pin === Number(inputLoginPin.value)) {
         labelWelcome.textContent = `Welcome back, ${currentAccount.owner.split(' ')[0]}`
         appContainer.style.opacity = '1';
     }
+
+    const currentDate = new Date();
+    const options = {
+        hour: 'numeric',
+        minute: 'numeric',
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric',
+        weekday: 'long',
+    }
+
+    labelDate.textContent = new Intl.DateTimeFormat(currentAccount.locale, options).format(currentDate);
+
     inputLoginUsername.value = '';
     inputLoginPin.value = '';
     inputLoginPin.blur();
+
+    if (timer) {
+        clearInterval(timer);
+    }
+    timer = startLogoutTimer();
+
     updateUI(currentAccount);
 
 })
@@ -199,19 +236,27 @@ btnTransfer.addEventListener('click', (event) => {
         currentAccount.movementsDates.push(new Date().toISOString())
         receiverAccount.movementsDates.push(new Date().toISOString())
         updateUI(currentAccount);
+
+        // Reset timer
+        clearInterval(timer);
+        timer = startLogoutTimer();
     }
 });
-
 
 // Loan button
 btnLoan.addEventListener('click', (event) => {
     event.preventDefault();
     const loanAmount = Math.floor(inputLoanAmount.value);
     if (loanAmount > 0 && currentAccount.movements.some(movement => movement >= loanAmount * 0.1)) {
-        currentAccount.movements.push(loanAmount);
-        currentAccount.movementsDates.push(new Date().toISOString());
-        updateUI(currentAccount);
+        setTimeout(() => {
+            currentAccount.movements.push(loanAmount);
+            currentAccount.movementsDates.push(new Date().toISOString());
+            updateUI(currentAccount);
+        }, 2500);
     }
+    inputLoanAmount.value = '';
+    clearInterval(timer);
+    timer = startLogoutTimer();
 });
 
 btnClose.addEventListener('click', (event) => {
@@ -222,8 +267,8 @@ btnClose.addEventListener('click', (event) => {
         accounts.splice(index, 1);
 
         // Hide UI
-        appContainer.style.opacity = '0';
         inputCloseUsername.value = inputClosePin.value = '';
+        appContainer.style.opacity = '0';
         labelWelcome.textContent = 'Login to get started';
     }
 })
@@ -234,6 +279,5 @@ btnSort.addEventListener('click', (event) => {
     displayMovements(currentAccount, !sorted);
     sorted = !sorted;
 });
-
 
 
