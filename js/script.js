@@ -15,7 +15,7 @@ const account1 = {
         '2020-05-08T14:11:59.604Z',
         '2020-05-27T17:01:17.194Z',
         '2020-07-11T23:36:17.929Z',
-        '2020-07-12T10:51:36.790Z',
+        '2023-01-01T10:51:36.790Z',
     ],
     currency: 'EUR',
     locale: 'pt-PT', // de-DE
@@ -44,7 +44,7 @@ const account2 = {
 const accounts = [account1, account2];
 
 // Elements
-const labelWelcome = document.querySelector('.welcome');
+const labelWelcome = document.querySelector('.header__welcome-text');
 const labelDate = document.querySelector('.date');
 const labelBalance = document.querySelector('.balance__value');
 const labelSumIn = document.querySelector('.summary__value--in');
@@ -54,7 +54,7 @@ const labelTimer = document.querySelector('.timer');
 
 const appContainer = document.querySelector('.app');
 const movementsContainer = document.querySelector('.movements');
-const logo = document.querySelector('.logo');
+const logo = document.querySelector('.header__logo');
 
 const btnLogin = document.querySelector('.login__btn');
 const btnTransfer = document.querySelector('.form__btn--transfer');
@@ -70,184 +70,58 @@ const inputLoanAmount = document.querySelector('.form__input--loan-amount');
 const inputCloseUsername = document.querySelector('.form__input--user');
 const inputClosePin = document.querySelector('.form__input--pin');
 
+let currentAccount = accounts[0];
 
-// Displaying movements
-const displayMovements = function (account, sort = false) {
+let movements = [5000, 3400, -150, -790, -3210, -1000, 8500, -30];
+const displayMovements = (movements, sort = false) => {
     movementsContainer.innerHTML = '';
 
-    const currentMovements = sort ? account.movements.slice().sort((a, b) => a - b) : account.movements;
+    const currentMovements = sort ? currentAccount.movements.slice().sort((a, b) => a- b) : currentAccount.movements;
 
     currentMovements.forEach((movement, index) => {
         const type = movement > 0 ? 'deposit' : 'withdrawal';
-        let date = new Date(account.movementsDates[index]);
-        const day = `${date.getDate()}`.padStart(2, '0');
-        const month = `${date.getMonth() + 1}`.padStart(2, '0');
-        const year = date.getFullYear();
-
-        let displayDate = `${day}/${month}/${year}`;
 
         const html = `
-       <div class="movements__row">
-         <div class="movements__type movements__type--${type}">${index + 1} ${type}</div>
-          <div class="movements__date">${displayDate}</div>
-        <div class="movements__value">${movement.toFixed(2)}€</div>
-      </div>
-    `;
+      <div class="movements__row">
+            <div class="movements__type movements__type--${type}">${index + 1} ${type}</div>
+            <div class="movements__date">3 days ago</div>
+            <div class="movements__value">${movement}€</div>
+       </div>
+        `;
         movementsContainer.insertAdjacentHTML('afterbegin', html);
-    });
+    })
 };
 
-
-// Creating usernames
+// Create usernames
 const createUserNames = (accounts) => {
     accounts.forEach((account) => {
-        account.username = account.owner.split(' ').map(element => element[0].toLowerCase()).join('');
+        account.username = account.owner.toLowerCase().split(' ').map(element => element[0]).join('');
     })
 }
-
 createUserNames(accounts);
 
-// Calculating and Displaying Balance
-
 const calculateDisplayBalance = (account) => {
-    account.balance = account.movements.reduce((accumulator, movement) => accumulator + movement, 0);
+    account.balance = account.movements.reduce((acc, movement) => acc + movement, 0);
     labelBalance.textContent = `${account.balance.toFixed(2)} €`;
 }
 
-// Calculating summary
-const calculateDisplaySummary = (account) => {
-    const incomes = account.movements.filter(movement => movement > 0).reduce((accumulator, movement) => accumulator + movement, 0);
-    labelSumIn.textContent = `${incomes.toFixed(2)}€`;
-
-    const outcomes = account.movements.filter(movement => movement < 0).reduce((accumulator, movement) => accumulator + movement, 0);
-    labelSumOut.textContent = `${Math.abs(outcomes).toFixed(2)}€`;
-
-    const interest = account.movements.filter(movement => movement > 0).map(deposit => (deposit * account.interestRate) / 100).filter((interest) => interest >= 1).reduce((accumulator, movement) => accumulator + movement, 0);
-
-    labelSumInterest.textContent = `${interest.toFixed(2)}€`
-}
-
-const updateUI = (account) => {
-    // Display Movements
-    displayMovements(account);
-
-    // Display Balance
-    calculateDisplayBalance(account);
-
-    // Display Summary
-    calculateDisplaySummary(account);
-}
+calculateDisplayBalance(currentAccount);
 
 
-// Implementing Login
-let currentAccount;
 
-// Fake login
-currentAccount = account1;
-updateUI(currentAccount);
-appContainer.style.opacity = 1;
-
-const currentDate = new Date();
-const day = `${currentDate.getDate()}`.padStart(2, '0');
-const month = `${currentDate.getMonth() + 1}`.padStart(2, '0');
-const year = currentDate.getFullYear();
-const hour = `${currentDate.getHours()}`.padStart(2, '0');
-const minutes = `${currentDate.getMinutes()}`.padStart(2, '0');
-
-labelDate.textContent = `${day}/${month}/${year}, ${hour}:${minutes}`;
-
-btnLogin.addEventListener('click', (event) => {
-    event.preventDefault();
-    currentAccount = accounts.find(account => account.username === inputLoginUsername.value);
-    if (currentAccount?.pin === Number(inputLoginPin.value)) {
-        // Display Ui and Message
-        labelWelcome.textContent = `Welcome back, ${currentAccount.owner.split(' ')[0]}`;
-        appContainer.style.opacity = 1;
-    }
-
-    // Clear input fields
-    inputLoginUsername.value = '';
-    inputLoginPin.value = '';
-    inputLoginPin.blur();
-
-    updateUI(currentAccount);
-});
-
-
-// Implementing Transfers
-btnTransfer.addEventListener('click', (event) => {
-    event.preventDefault()
-    let receiverAccount = accounts.find((account) => account.username === inputTransferTo.value);
-    let transferAmount = Number(inputTransferAmount.value);
-
-    inputTransferTo.value = inputTransferAmount.value = '';
-
-    if (transferAmount > 0 && receiverAccount && currentAccount.balance >= transferAmount && receiverAccount?.username !== currentAccount.username) {
-        currentAccount.movements.push(-Math.abs(transferAmount));
-        receiverAccount.movements.push(transferAmount);
-
-        currentAccount.movementsDates.push(new Date().toISOString());
-        receiverAccount.movementsDates.push(new Date().toISOString());
-
-        updateUI(currentAccount);
-    }
-
-
-})
-
-btnLoan.addEventListener('click', (event) => {
-    event.preventDefault();
-    const loanAmount = Math.floor(inputLoanAmount.value);
-    if (loanAmount > 0 && currentAccount.movements.some(movement => movement >= loanAmount * 0.1)) {
-        currentAccount.movements.push(loanAmount);
-        currentAccount.movementsDates.push(new Date().toISOString());
-        updateUI(currentAccount);
-    }
-    inputLoanAmount.textContent = '';
-})
-
-
-btnClose.addEventListener('click', (event) => {
-    event.preventDefault();
-    if (inputCloseUsername.value === currentAccount.username && Number(inputClosePin.value) === currentAccount.pin) {
-        const index = accounts.findIndex(account => account.username === currentAccount.username);
-        // Delete account
-        accounts.splice(index, 1);
-
-        // Hide Ui
-        appContainer.style.opacity = 0;
-
-        inputCloseUsername.value = inputClosePin.value = '';
-        labelWelcome.textContent = `Login to get started`;
-    }
-});
 
 let sorted = false;
 btnSort.addEventListener('click', (event) => {
     event.preventDefault();
-    displayMovements(currentAccount, !sorted);
-    sorted = !sorted;
+    if (sorted) {
+        sorted = false;
+        displayMovements(accounts[0], sorted);
+    } else {
+        sorted = true;
+        displayMovements(accounts[0], sorted);
+    }
+
 });
 
-const future = new Date (2037, 10, 19, 15, 23);
-console.log(Number(future));
-
-const calcDaysPassed = (date1, date2) => {
-    return (date2- date1) / (1000 * 60 * 60 * 24)
-};
-const days1 = calcDaysPassed(new Date(2022, 0, 31), new Date(2024, 0, 31));
-console.log(days1);
-
-
-
-
-
-
-
-
-
-
-
-
-
+displayMovements(movements);
 
