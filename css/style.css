@@ -1,20 +1,24 @@
+:root {
 
-* {
+}
+
+*,
+*::before,
+*::after {
     margin: 0;
     padding: 0;
-    box-sizing: inherit;
+    box-sizing: border-box;
 }
 
 html {
     font-size: 62.5%;
-    box-sizing: border-box;
 }
 
 body {
     font-family: "Poppins", sans-serif;
     color: #444;
     background-color: #f3f3f3;
-    height: 100vh;
+    min-height: 100vh;
     padding: 2rem;
 }
 
@@ -25,20 +29,20 @@ nav {
     padding: 0 2rem;
 }
 
-.welcome {
+.header__welcome-text {
     font-size: 1.9rem;
     font-weight: 500;
 }
 
-.logo {
+.header__logo {
     height: 5.25rem;
 }
 
-.login {
+.header__login {
     display: flex;
 }
 
-.login__input {
+.header__login-input {
     padding: 0.5rem 2rem;
     font-size: 1.6rem;
     font-family: inherit;
@@ -51,12 +55,12 @@ nav {
     transition: all 0.3s;
 }
 
-.login__input:focus {
+.header__login-input:focus {
     outline: none;
     border: 1px solid #ccc;
 }
 
-.login__input::placeholder {
+.header__login-input::placeholder {
     color: #bbb;
 }
 
@@ -84,6 +88,10 @@ input::-webkit-inner-spin-button {
     margin: 0;
 }
 
+input[type=number] {
+    -moz-appearance: textfield;
+}
+
 /* MAIN */
 .app {
     position: relative;
@@ -94,8 +102,7 @@ input::-webkit-inner-spin-button {
     grid-template-rows: auto repeat(3, 15rem) auto;
     gap: 2rem;
 
-    /* NOTE This creates the fade in/out anumation */
-    opacity: 0;
+    opacity: 1;
     transition: opacity 0.5s ease-in-out;
 }
 
